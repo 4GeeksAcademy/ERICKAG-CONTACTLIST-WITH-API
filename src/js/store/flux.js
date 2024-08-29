@@ -1,3 +1,4 @@
+import { stringify } from "query-string";
 
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
@@ -9,17 +10,37 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 		actions: {
 			getAgendas: async () => {
-				const request = await fetch('https://playground.4geeks.com/contact/agendas/ErickAG', {
-					method: 'GET',
-					headers: {
-						"Content-Type": "application/json",
-					},
-
-				})
-				const response = await request.json()
-				setStore({ contacts: response.contacts })
+				try {
+					const request = await fetch('https://playground.4geeks.com/contact/agendas/ErickAG', {
+						method: 'GET',
+						headers: {
+							"Content-Type": "application/json",
+						},
+					});
+			
+					if (request.ok) {
+						const response = await request.json();
+						setStore({ contacts: response.contacts });
+					} else {
+						const postRequest = await fetch('https://playground.4geeks.com/contact/agendas/ErickAG', {
+							method: 'POST',
+							headers: {
+								"Content-Type": "application/json",
+							},
+						});
+			
+						if (postRequest.ok) {
+							const postResponse = await postRequest.json();
+							console.log(postResponse)
+						} else {
+							console.error('Failed to create a new agenda');
+						}
+					}
+				} catch (error) {
+					console.error('Error fetching or creating an agenda:', error);
+				}
 			},
-
+			
 			makeContact: async (userInfo) => {
 				const request = await fetch('https://playground.4geeks.com/contact/agendas/ErickAG/contacts', {
 					method: 'POST',
